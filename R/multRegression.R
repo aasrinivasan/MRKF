@@ -133,3 +133,60 @@ SCADSelection = function(Xaug, Y, n, Omega0 = NULL){
   res = list(optimalBeta = optimalBeta, scadFit = scadFit)
   return(res)
 }
+
+# Single Knockoff Setting
+runSingleKF = function(X,Y,q, penalty){
+  if(penalty == "lasso"){
+    print("Running Lasso Stat")
+    penaltyStat = stat.glmnet_coefdiff
+  }
+  if(penalty == "scad"){
+    print("Running SCAD Stat")
+    penaltyStat = stat.SCAD_coefdiff
+  }
+  if(penalty == "alasso"){
+    print("Running A.Lasso Stat")
+    penaltyStat = stat.ada_coefdiff
+  }
+
+
+  kfp = knockoff.filter(X, Y, statistic = penaltyStat, fdr = q, offset = 1)$selected
+  kf = knockoff.filter(X, Y, statistic = penaltyStat, fdr = q, offset = 0)$selected
+  res = list(S = kf, Sp = kfp)
+  return(res)
+
+}
+
+
+
+stat.SCAD_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
+  # Compute statistics
+  Z = cv_coeffs_SCAD(cbind(X, X_k), y, family=family, parallel=parallel, ...)
+  p = ncol(X)
+  orig = 1:p
+  W = abs(Z[orig]) - abs(Z[orig+p])
+
+}
+cv_coeffs_SCAD <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
+  n = nrow(X); p = ncol(X)
+  cv.SCAD = cv.ncvreg(X, y, penalty = "SCAD")
+  coef(cv.SCAD, s = "lambda.min")[2:(p+1)]
+}
+
+stat.ada_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
+  # Compute statistics
+  Z = cv_coeffs_ada(cbind(X, X_k), y, family=family, parallel=parallel, ...)
+  p = ncol(X)
+  orig = 1:p
+  W = abs(Z[orig]) - abs(Z[orig+p])
+
+}
+cv_coeffs_ada <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
+  n = nrow(X); p = ncol(X)
+
+  ridge1 = cv.glmnet(x = X, y = y, alpha = 0)
+  ridgeCoef = coef(ridge1, s = ridge1$lambda.min)[-1]
+
+  alasso1 = cv.glmnet(X, y, alpha = 1, penalty.factor = 1/abs(ridgeCoef))
+  coef(alasso1, s = "lambda.min")[2:(p+1)]
+}

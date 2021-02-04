@@ -13,7 +13,7 @@ generateData = function(n,p,q, nGroup, s1, s2,errorRho, Bmatrix,sigma){
     }
   }
 
-  print("Genreating E")
+  print("Generating E")
   E = matrix(0, nrow = n, ncol = nGroup)
   for(i in 1:n){
     ei = rnorm(nGroup, mean = rep(0, nGroup), errorCovariance)
