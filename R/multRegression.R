@@ -5,20 +5,20 @@
 #' @param n number of samples
 #' @param K number of responses
 #' @return the omega estimated through step 1
-Step1 = function(Xaug, Y, n, K, method = "S"){
+Step1 = function(Xmat, Y, n, K, method = "lasso"){
   Omega0 = diag(K)
 
-  if(method == "S"){
-    sel = SCADSelection(Xaug, Y, n, Omega0)
+  if(method == "scad"){
+    sel = SCADSelection(Xmat, Y, n, Omega0)
   }
-  if(method == "L"){
-    sel = LassoSelection(Xaug, Y, n, Omega0)
+  if(method == "lasso"){
+    sel = LassoSelection(Xmat, Y, n, Omega0)
   }
-  if(method == "A"){
-    sel = adaLassoSelection(Xaug, Y, n, Omega0)
+  if(method == "alasso"){
+    sel = adaLassoSelection(Xmat, Y, n, Omega0)
   }
   optBeta = sel$optimalBeta
-  resids = Y-Xaug%*%t(t(optBeta))
+  resids = Y-Xmat%*%t(t(optBeta))
   residMatrix = matrix(0, nrow = n, ncol = K)
   for(i in 1:K){
     marg = seq(i,length(resids), by = K)
@@ -38,7 +38,7 @@ Step1 = function(Xaug, Y, n, K, method = "S"){
 #' @param n the number of samples
 #' @param penalty the penalty function of interest
 #' @return The result after selection
-Step2 = function(Xaug, Y, step1Omega, n, penalty = "scad"){
+Step2 = function(Xaug, Y, step1Omega, n, method = "scad"){
   if(method == "scad"){
     result = SCADSelection(Xaug, Y, n, step1Omega)
   }
@@ -59,19 +59,8 @@ Step2 = function(Xaug, Y, step1Omega, n, penalty = "scad"){
 #' @param Omega0 the estimated omega matrix
 #' @return The result of the lasso fit
 LassoSelection = function(Xaug, Y, n, Omega0 = NULL){
-  for(i in 1:n){
-    if(i == 1){
-      blockOmega0 = Omega0
-    }
-    else{
-      blockOmega0 = bdiag(blockOmega0, Omega0)
-    }
-  }
-  sqrtOmega0 = sqrtm(blockOmega0)
-  whiteY = sqrtOmega0%*%Y
-  whiteXaug = scale(sqrtOmega0%*%Xaug)
-
-  lassoFit = cv.glmnet(whiteXaug, whiteY, intercept = F)
+  Xaug = scale(Xaug)
+  lassoFit = cv.glmnet(Xaug, Y, intercept = F)
   optimalBeta = coef(lassoFit, s = "lambda.min")[-1]
   res = list(fit = lassoFit, optimalBeta = optimalBeta)
   return(res)
@@ -85,21 +74,11 @@ LassoSelection = function(Xaug, Y, n, Omega0 = NULL){
 #' @param Omega0 the estimated omega matrix
 #' @return The result of adaptive lasso method
 adaLassoSelection = function(Xaug, Y, n, Omega0 = NULL){
-  for(i in 1:n){
-    if(i == 1){
-      blockOmega0 = Omega0
-    }
-    else{
-      blockOmega0 = bdiag(blockOmega0, Omega0)
-    }
-  }
-  sqrtOmega0 = sqrtm(blockOmega0)
-  whiteY = sqrtOmega0%*%Y
-  whiteXaug = scale(sqrtOmega0%*%Xaug)
-  ridge1 = cv.glmnet(x = whiteXaug, y = whiteY, alpha = 0)
+  Xaug = scale(Xaug)
+  ridge1 = cv.glmnet(x = Xaug, y = Y, alpha = 0)
   ridgeCoef = coef(ridge1, s = ridge1$lambda.min)[-1]
 
-  alasso1 = cv.glmnet(whiteXaug, whiteY, alpha = 1, penalty.factor = 1/abs(ridgeCoef))
+  alasso1 = cv.glmnet(Xaug, Y, alpha = 1, penalty.factor = 1/abs(ridgeCoef))
   optimalBeta = coef(alasso1, s = "lambda.min")[-1]
   res = list(fit = alasso1, optimalBeta = optimalBeta)
   return(res)
@@ -113,21 +92,8 @@ adaLassoSelection = function(Xaug, Y, n, Omega0 = NULL){
 #' @param Omega0 the estimated omega matrix
 #' @return The result from the SCAD fit
 SCADSelection = function(Xaug, Y, n, Omega0 = NULL){
-  for(i in 1:n){
-    if(i == 1){
-      blockOmega0 = Omega0
-    }
-    else{
-      blockOmega0 = bdiag(blockOmega0, Omega0)
-    }
-  }
-  sqrtOmega0 = sqrtm(blockOmega0)
-
-  whiteY = sqrtOmega0%*%Y
-  whiteXaug = sqrtOmega0%*%Xaug
-
   # Run SCAD
-  scad.l2 = cv.ncvreg(whiteXaug, whiteY, penalty = "SCAD")
+  scad.l2 = cv.ncvreg(Xaug,  Y, penalty = "SCAD")
   optimalBeta = coef(scad.l2, s = "lambda.min")[-1]
   scadFit = scad.l2
   res = list(optimalBeta = optimalBeta, scadFit = scadFit)

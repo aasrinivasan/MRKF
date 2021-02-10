@@ -4,7 +4,7 @@ set.seed(123)
 n = 100
 p = 200
 pstar = p + 1
-K = 1
+K = 2
 A = 3
 k = 5
 q = .2
@@ -20,7 +20,7 @@ for(i in 1:pstar){
 
 means = rep(1, pstar)
 W = mvlognormal(n, means, Sigma = diag(sigma), R = sigma)
-
+colnames(W) = paste("Taxa", 1:ncol(W))
 # generate B
 B = rep(0,p)
 signals = sample(1:p,k)
@@ -29,6 +29,7 @@ B[signals] = signalValue
 
 # gererate error
 eps = rnorm(n, 0, 1)
+eps2 = rnorm(n,0,1)
 
 # generate Z
 Z = acomp(W)
@@ -43,6 +44,9 @@ for(t in 1:ncol(X)){
 
 # generate Y
 Y = X%*%B + eps
+Y2 =  X%*%B + eps
 
-result = MRKF(W, Y, q, "alasso")
+Ymatrix = cbind(Y, Y2)
+colnames(Ymatrix) = paste("Response", 1:ncol(Ymatrix))
+result = MRKF(W, Ymatrix, q, "alasso")
 print(result)
