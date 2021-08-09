@@ -8,28 +8,50 @@ K = 2
 A = 3
 k = 5
 q = .2
+sp = .1
 
-# W covariance
+# Generate covariance of W
 sigma = matrix(0, nrow = pstar, ncol = pstar)
-
 for(i in 1:pstar){
   for(j in 1:pstar){
-    sigma[i,j] = .5^(abs(i-j))
+    sigma[i,j] = .7^(abs(i-j))
   }
 }
 
+# generate W
 means = rep(1, pstar)
 W = mvlognormal(n, means, Sigma = diag(sigma), R = sigma)
 colnames(W) = paste("Taxa", 1:ncol(W))
-# generate B
-B = rep(0,p)
-signals = sample(1:p,k)
-signalValue = runif(k,min = -A, max = A)
-B[signals] = signalValue
 
-# gererate error
-eps = rnorm(n, 0, 1)
-eps2 = rnorm(n,0,1)
+# generate B
+means = rep(1, pstar)
+
+print(A)
+Aset = seq(-A,A)
+if(length(which(Aset==0))!=0){
+  Aset = Aset[-which(Aset==0)]
+}
+B = matrix(0, nrow = p, ncol = K)
+totalSig = p*K
+nSig = floor(totalSig*sp)
+signalEntries = sort(sample(1:totalSig, size = nSig, replace = F))
+Bset = sample(Aset, nSig, replace = T)
+B[signalEntries] = Bset
+
+
+# generate error matrix
+errorCovariance = matrix(0,K, K)
+for(i in 1:K){
+  for(j in 1:K){
+    errorCovariance[i,j] = errorRho^abs(i-j)
+  }
+}
+
+E = matrix(0, nrow = n, ncol = K)
+for(i in 1:n){
+  ei = rnorm(K, mean = rep(0, K), errorCovariance)
+  E[i,] = ei
+}
 
 # generate Z
 Z = acomp(W)
@@ -42,11 +64,7 @@ for(t in 1:ncol(X)){
   X[,t] = log(Z[,t]/ref)
 }
 
-# generate Y
-Y = X%*%B + eps
-Y2 =  X%*%B + eps
-
-Ymatrix = cbind(Y, Y2)
-colnames(Ymatrix) = paste("Response", 1:ncol(Ymatrix))
-result = MRKF(W, Ymatrix, q, "alasso")
+Y = X%*%B + E
+colnames(Y) = paste("Response", 1:ncol(Y))
+result = MRKF(W, Y, q, "lasso")
 print(result)

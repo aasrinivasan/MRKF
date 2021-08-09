@@ -6,15 +6,12 @@
 loadPackages = function(){
   library(mvtnorm)
   library(knockoff)
-  library(QUIC)
-  library(R.utils)
   library(MethylCapSig)
   library(GUniFrac)
   library(energy)
   library(compositions)
   library(doParallel)
   library(foreach)
-  library(parallel)
   library(ncvreg)
   library(glmnet)
   library(CVglasso)
@@ -22,5 +19,4 @@ loadPackages = function(){
   library(Matrix)
   library(matrixcalc)
   library(expm)
-  library(parcor)
 }

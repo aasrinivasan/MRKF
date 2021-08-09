@@ -1,19 +1,26 @@
 ### Simulation Functions
-generateData = function(n,p,q, nGroup, s1, s2,errorRho, Bmatrix,sigma){
+generateData = function(n, p, nGroup, errorRho, Bmatrix, sigma, type){
   pstar = p+1
   loadPackages()
   means = rep(1, pstar)
 
   print("Generating Cov")
-  # error covariance
-  errorCovariance = matrix(0,nGroup, nGroup)
-  for(i in 1:nGroup){
-    for(j in 1:nGroup){
-      errorCovariance[i,j] = errorRho^abs(i-j)
-    }
+
+  # compound symmetry
+  if(type == "CS"){
+    errorCovariance = matrix(errorRho, nGroup, nGroup)
+    diag(errorCovariance) = rep(1, nGroup)
   }
 
-  print("Generating E")
+  if(type  == "AR"){
+    errorCovariance = matrix(0,nGroup, nGroup)
+    for(i in 1:nGroup){
+      for(j in 1:nGroup){
+        errorCovariance[i,j] = errorRho^abs(i-j)
+      }
+    }
+  }
+  print("Genreating E")
   E = matrix(0, nrow = n, ncol = nGroup)
   for(i in 1:n){
     ei = rnorm(nGroup, mean = rep(0, nGroup), errorCovariance)
@@ -40,39 +47,12 @@ generateData = function(n,p,q, nGroup, s1, s2,errorRho, Bmatrix,sigma){
   for(t in 1:ncol(X)){
     X[,t] = log(Z[,t]/ref)
   }
+  betaVec = as.vector(Bmatrix)
 
-  print("Generating KF")
-  # Generate Knockoffs
-  Xkf = create.second_order(X)
+  Ymat = X%*%Bmatrix + E
+  Y = as.vector(Ymat)
 
-  Im = diag(nGroup)
-
-  for(i in 1:n){
-    Xi = kronecker(t(X[i,]), Im)
-    Xki = kronecker(t(Xkf[i,]), Im)
-    Ei  = E[i,]
-    tXi = t(Xi)
-    tXki = t(Xki)
-    tEi = t(E[i,])
-    if(i == 1){
-      Xmat = tXi
-      Xkmat = tXki
-      Emat = tEi
-    }
-    else{
-      Xmat = cbind(Xmat, tXi)
-      Xkmat = cbind(Xkmat, tXki)
-      Emat = cbind(Emat, tEi)
-    }
-  }
-  Xmat = t(Xmat)
-  Xkmat = t(Xkmat)
-  Emat = t(Emat)
-  Xaug = cbind(Xmat, Xkmat)
-  betaVec = as.vector(t(Bmatrix))
-  Y = Xmat%*%betaVec + Emat
-
-  res = list(Y=Y, X = X, B = Bmatrix, betaVec = betaVec, Xaug = Xaug, W = W)
+  res = list(Y=Y, Ymat = Ymat, X = X, B = Bmatrix, betaVec = betaVec, W = W)
   return(res)
 }
 
@@ -86,40 +66,4 @@ computePower = function(X,truth){
   P= length(truth)
   TP = length(which(X%in%truth))
   return(TP/P)
-}
-
-
-#### Marginal SCAD
-stat.SCAD_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
-  # Compute statistics
-  Z = cv_coeffs_SCAD(cbind(X, X_k), y, family=family, parallel=parallel, ...)
-  p = ncol(X)
-  orig = 1:p
-  W = abs(Z[orig]) - abs(Z[orig+p])
-
-}
-cv_coeffs_SCAD <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
-  n = nrow(X); p = ncol(X)
-  cv.SCAD = cv.ncvreg(X, y, penalty = "SCAD")
-  coef(cv.SCAD, s = "lambda.min")[2:(p+1)]
-}
-
-
-#### Marginal Adaptive
-stat.ada_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
-  # Compute statistics
-  Z = cv_coeffs_ada(cbind(X, X_k), y, family=family, parallel=parallel, ...)
-  p = ncol(X)
-  orig = 1:p
-  W = abs(Z[orig]) - abs(Z[orig+p])
-
-}
-cv_coeffs_ada <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
-  n = nrow(X); p = ncol(X)
-
-  ridge1 = cv.glmnet(x = X, y = y, alpha = 0)
-  ridgeCoef = coef(ridge1, s = ridge1$lambda.min)[-1]
-
-  alasso1 = cv.glmnet(X, y, alpha = 1, penalty.factor = 1/abs(ridgeCoef))
-  coef(alasso1, s = "lambda.min")[2:(p+1)]
 }

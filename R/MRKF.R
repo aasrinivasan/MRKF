@@ -81,15 +81,15 @@ MRKF = function(W, Ymat, q, penalty = "lasso"){
 
     selectedMatrix = matrix(selected, nrow = p, ncol = K, byrow = F)
     selectedMatrixp = matrix(selectedp, nrow = p, ncol = K, byrow = F)
-
+    print(p)
+    print(K)
     predictorNames = colnames(Z)[-pstar]
 
     rownames(selectedMatrix) = predictorNames
     rownames(selectedMatrixp) = predictorNames
     colnames(selectedMatrix) = responseNames
     colnames(selectedMatrixp) = responseNames
-    print(selectedMatrix)
-    print("Returing Selection Set")
+    print("Returning Selection Set")
     results = list("S" = selectedMatrix, "Sp"= selectedMatrixp)
     return(results)
   }
