@@ -1,4 +1,19 @@
-loadPackages()
+#' @import mvtnorm
+#' @import knockoff
+#' @import R.utils
+#' @import MethylCapSig
+#' @import GUniFrac
+#' @import energy
+#' @import compositions
+#' @import ncvreg
+#' @import glmnet
+#' @import CVglasso
+#' @import Matrix
+#' @import matrixcalc
+#' @import expm
+#' @import parcor
+#' @import doParallel
+#' @import foreach
 set.seed(123)
 # Initialize Parameters
 n = 100
@@ -9,7 +24,7 @@ A = 3
 k = 5
 q = .2
 sp = .1
-
+errorRho = .7
 # Generate covariance of W
 sigma = matrix(0, nrow = pstar, ncol = pstar)
 for(i in 1:pstar){

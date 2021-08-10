@@ -2,8 +2,8 @@
 #' @description loads all required external packages
 #' @keywords internal
 #' @noRd
-#' @export
-loadPackages = function(){
+#' @export packageInitialization
+packageInitialization = function(){
   library(mvtnorm)
   library(knockoff)
   library(MethylCapSig)

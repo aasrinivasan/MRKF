@@ -2,7 +2,7 @@
 % Please edit documentation in R/multRegression.R
 \name{SCADSelection}
 \alias{SCADSelection}
-\title{Run the selection method through SCAD penalty (Fan, 2001)}
+\title{Run the selection method employing the SCAD penalty (Fan, 2001)}
 \usage{
 SCADSelection(Xaug, Y, n, Omega0 = NULL)
 }
@@ -19,5 +19,5 @@ SCADSelection(Xaug, Y, n, Omega0 = NULL)
 The result from the SCAD fit
 }
 \description{
-Run the selection method through SCAD penalty (Fan, 2001)
+Run the selection method employing the SCAD penalty (Fan, 2001)
 }

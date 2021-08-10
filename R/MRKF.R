@@ -1,14 +1,50 @@
-#' Run the multiple response knockoff filter
+#' Multiple Response Knockoff Filter
 #'
-#' @param W OTU count matrix
-#' @param Y matrix of responses
-#' @param q target FDP
-#' @param penalty type of penalty for selection
-
+#' Run the MRKF procedure
+#'
+#' @param W OTU count matrix of dimension (n x p^*)
+#' @param Y matrix of responses (n x K)
+#' @param q target FDP (0,1)
+#' @param penalty type of penalty for selection: "lasso", "alasso", or "scad"
+#' @return A list containing the following components:
+#' \item{S}{The estimated selection matrix for B under the knockoff threshold}
+#' \item{Sp}{The estimated selection matrix for B under the knockoff+ threshold}
+#'
+#' @details The MRKF method relies on the model-X formulation which assumes that the underlying
+#' alr transformed data \eqn{X} follows a multivariate normal distribution. The model-X formulation generates
+#' knockoff copies by estimating the underlying mean and covariance structure. Note that the MRKF
+#' method requires the input of the raw, non-compositional data \eqn{W}.
+#'
+#' If the number of responses, \eqn{K=1}, then the MRKF method defaults to a variation of the
+#' compostional knockoff filter (CKF) by Srinivasan et al., 2020.
+#'
+#' The knockoff importance statistic used in this analysis is the lasso coefficient difference statistic.
+#'
+#' @references
+#'
+#' Srinivasan, A, Xue, L, Zhan, X. Compositional knockoff filter for high-dimensional regression analysis of microbiome data.
+#' Biometrics. 2020; 1– 12. https://doi.org/10.1111/biom.13336
+#' @import mvtnorm
+#' @import knockoff
+#' @import R.utils
+#' @import MethylCapSig
+#' @import GUniFrac
+#' @import energy
+#' @import compositions
+#' @import ncvreg
+#' @import glmnet
+#' @import CVglasso
+#' @import Matrix
+#' @import matrixcalc
+#' @import expm
+#' @import parcor
+#' @import doParallel
+#' @import foreach
+#' @export MRKF
 MRKF = function(W, Ymat, q, penalty = "lasso"){
   ### Load Packages ###
-  print("Loading Packages")
-  loadPackages()
+  #print("Loading Packages")
+  #packageInitialization()
   K = ncol(Ymat)
   n = nrow(W)
   pstar = ncol(W)

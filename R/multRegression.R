@@ -5,6 +5,7 @@
 #' @param n number of samples
 #' @param K number of responses
 #' @return the omega estimated through step 1
+#' @export Step1
 Step1 = function(Xmat, Y, n, K, method = "lasso"){
   Omega0 = diag(K)
 
@@ -38,6 +39,7 @@ Step1 = function(Xmat, Y, n, K, method = "lasso"){
 #' @param n the number of samples
 #' @param penalty the penalty function of interest
 #' @return The result after selection
+#' @export Step2
 Step2 = function(Xaug, Y, step1Omega, n, method = "scad"){
   if(method == "scad"){
     result = SCADSelection(Xaug, Y, n, step1Omega)
@@ -66,13 +68,14 @@ LassoSelection = function(Xaug, Y, n, Omega0 = NULL){
   return(res)
 }
 
-#' Run the selection method through adaptive lasso penalty (Zou, 2006)
+#' Run the selection method employing the adaptive lasso penalty (Zou, 2006)
 #'
 #' @param Xaug Design matrix of original data column augmented by knockoffs
 #' @param Y vectorized response vector
 #' @param n the number of samples
 #' @param Omega0 the estimated omega matrix
 #' @return The result of adaptive lasso method
+#' @export adaLassoSelection
 adaLassoSelection = function(Xaug, Y, n, Omega0 = NULL){
   Xaug = scale(Xaug)
   ridge1 = cv.glmnet(x = Xaug, y = Y, alpha = 0)
@@ -84,13 +87,14 @@ adaLassoSelection = function(Xaug, Y, n, Omega0 = NULL){
   return(res)
 }
 
-#' Run the selection method through SCAD penalty (Fan, 2001)
+#' Run the selection method employing the SCAD penalty (Fan, 2001)
 #'
 #' @param Xaug Design matrix of original data column augmented by knockoffs
 #' @param Y vectorized response vector
 #' @param n the number of samples
 #' @param Omega0 the estimated omega matrix
 #' @return The result from the SCAD fit
+#' @export SCADSelection
 SCADSelection = function(Xaug, Y, n, Omega0 = NULL){
   # Run SCAD
   scad.l2 = cv.ncvreg(Xaug,  Y, penalty = "SCAD")
@@ -101,6 +105,7 @@ SCADSelection = function(Xaug, Y, n, Omega0 = NULL){
 }
 
 # Single Knockoff Setting
+#' @export runSingleKF
 runSingleKF = function(X,Y,q, penalty){
   if(penalty == "lasso"){
     print("Running Lasso Stat")
@@ -124,7 +129,7 @@ runSingleKF = function(X,Y,q, penalty){
 }
 
 
-
+#' @export stat.SCAD_coefdiff
 stat.SCAD_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   # Compute statistics
   Z = cv_coeffs_SCAD(cbind(X, X_k), y, family=family, parallel=parallel, ...)
@@ -133,12 +138,14 @@ stat.SCAD_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   W = abs(Z[orig]) - abs(Z[orig+p])
 
 }
+#' @export cv_coefffs_SCAD
 cv_coeffs_SCAD <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
   n = nrow(X); p = ncol(X)
   cv.SCAD = cv.ncvreg(X, y, penalty = "SCAD")
   coef(cv.SCAD, s = "lambda.min")[2:(p+1)]
 }
 
+#' @export stat.ada_coefdiff
 stat.ada_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   # Compute statistics
   Z = cv_coeffs_ada(cbind(X, X_k), y, family=family, parallel=parallel, ...)
@@ -147,6 +154,7 @@ stat.ada_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   W = abs(Z[orig]) - abs(Z[orig+p])
 
 }
+#' @export cv_coeffs_ada
 cv_coeffs_ada <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
   n = nrow(X); p = ncol(X)
 

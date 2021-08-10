@@ -1,4 +1,5 @@
 ### Knockoff Functions
+#' @export computeLCD
 computeLCD = function(B){
   p = length(B)
   orig = 1:(p/2)
@@ -9,7 +10,7 @@ computeLCD = function(B){
   W = oB-kB
   return(W)
 }
-
+#' @export selectFeatures
 selectFeatures = function(W, thresh, offset){
   t = knockoff.threshold(W, thresh, offset)
   S = which(W >= t)

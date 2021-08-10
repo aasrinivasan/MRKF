@@ -4,7 +4,7 @@
 \alias{Step2}
 \title{Run Step 2 of Multivariate Outcome Regression method proposed by Sofer et al (2014)}
 \usage{
-Step2(Xaug, Y, step1Omega, n, penalty = "scad")
+Step2(Xaug, Y, step1Omega, n, method = "scad")
 }
 \arguments{
 \item{Xaug}{Design matrix of original data column augmented by knockoffs}

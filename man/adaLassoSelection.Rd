@@ -2,7 +2,7 @@
 % Please edit documentation in R/multRegression.R
 \name{adaLassoSelection}
 \alias{adaLassoSelection}
-\title{Run the selection method through adaptive lasso penalty (Zou, 2006)}
+\title{Run the selection method employing the adaptive lasso penalty (Zou, 2006)}
 \usage{
 adaLassoSelection(Xaug, Y, n, Omega0 = NULL)
 }
@@ -19,5 +19,5 @@ adaLassoSelection(Xaug, Y, n, Omega0 = NULL)
 The result of adaptive lasso method
 }
 \description{
-Run the selection method through adaptive lasso penalty (Zou, 2006)
+Run the selection method employing the adaptive lasso penalty (Zou, 2006)
 }

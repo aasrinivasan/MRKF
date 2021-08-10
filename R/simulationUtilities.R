@@ -1,7 +1,8 @@
 ### Simulation Functions
+#' @export generateData
 generateData = function(n, p, nGroup, errorRho, Bmatrix, sigma, type){
   pstar = p+1
-  loadPackages()
+  packageInitialization()
   means = rep(1, pstar)
 
   print("Generating Cov")
@@ -56,12 +57,14 @@ generateData = function(n, p, nGroup, errorRho, Bmatrix, sigma, type){
   return(res)
 }
 
+#' @export computeFDR
 computeFDR = function(X, truth){
   d = max(length(X),1)
   FP = length(X) - length(which(X%in%truth))
   return(FP/d)
 }
 
+#' @export computePower
 computePower = function(X,truth){
   P= length(truth)
   TP = length(which(X%in%truth))

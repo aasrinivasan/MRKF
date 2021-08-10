@@ -4,16 +4,16 @@
 \alias{Step1}
 \title{Run Step 1 of Multivariate Outcome Regression method proposed by Sofer et al (2014)}
 \usage{
-Step1(Xaug, Y, n, K, method = "S")
+Step1(Xmat, Y, n, K, method = "lasso")
 }
 \arguments{
-\item{Xaug}{Design matrix of original data column augmented by knockoffs}
-
 \item{Y}{vectorized response vector}
 
 \item{n}{number of samples}
 
 \item{K}{number of responses}
+
+\item{Xaug}{Design matrix of original data column augmented by knockoffs}
 }
 \value{
 the omega estimated through step 1
