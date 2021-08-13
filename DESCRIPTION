@@ -1,6 +1,6 @@
-Package: MRKF
+Package: MCRKF
 Type: Package
-Title: This package runs the multiple response knockoff filter (MRKF)
+Title: This package runs the multiple response knockoff filter (MRCKF)
 Version: 0.1.0
 Author: Arun Srinivasan
 Maintainer: Arun Srinivasan <uus91@psu.edu>
