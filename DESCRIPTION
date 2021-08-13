@@ -1,4 +1,4 @@
-Package: MCRKF
+Package: MRCKF
 Type: Package
 Title: This package runs the multiple response knockoff filter (MRCKF)
 Version: 0.1.0
