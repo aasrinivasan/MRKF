@@ -138,7 +138,7 @@ stat.SCAD_coefdiff <- function(X, X_k, y, family='gaussian', cores=2, ...) {
   W = abs(Z[orig]) - abs(Z[orig+p])
 
 }
-#' @export cv_coefffs_SCAD
+#' @export cv_coeffs_SCAD
 cv_coeffs_SCAD <- function(X, y, nlambda=500, intercept=T, parallel=T, ...) {
   n = nrow(X); p = ncol(X)
   cv.SCAD = cv.ncvreg(X, y, penalty = "SCAD")
