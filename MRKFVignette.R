@@ -81,5 +81,5 @@ for(t in 1:ncol(X)){
 
 Y = X%*%B + E
 colnames(Y) = paste("Response", 1:ncol(Y))
-result = MRKF(W, Y, q, "lasso")
+result = MRCKF(W, Y, q, "lasso")
 print(result)

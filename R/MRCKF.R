@@ -1,6 +1,6 @@
 #' Multiple Response Knockoff Filter
 #'
-#' Run the MRKF procedure
+#' Run the MRCKF procedure
 #'
 #' @param W OTU count matrix of dimension (n x p^*)
 #' @param Y matrix of responses (n x K)
@@ -10,12 +10,12 @@
 #' \item{S}{The estimated selection matrix for B under the knockoff threshold}
 #' \item{Sp}{The estimated selection matrix for B under the knockoff+ threshold}
 #'
-#' @details The MRKF method relies on the model-X formulation which assumes that the underlying
+#' @details The MRCKF method relies on the model-X formulation which assumes that the underlying
 #' alr transformed data \eqn{X} follows a multivariate normal distribution. The model-X formulation generates
-#' knockoff copies by estimating the underlying mean and covariance structure. Note that the MRKF
+#' knockoff copies by estimating the underlying mean and covariance structure. Note that the MRCKF
 #' method requires the input of the raw, non-compositional data \eqn{W}.
 #'
-#' If the number of responses, \eqn{K=1}, then the MRKF method defaults to a variation of the
+#' If the number of responses, \eqn{K=1}, then the MRCKF method defaults to a variation of the
 #' compostional knockoff filter (CKF) by Srinivasan et al., 2020.
 #'
 #' The knockoff importance statistic used in this analysis is the lasso coefficient difference statistic.
@@ -40,8 +40,8 @@
 #' @import parcor
 #' @import doParallel
 #' @import foreach
-#' @export MRKF
-MRKF = function(W, Ymat, q, penalty = "lasso"){
+#' @export MRCKF
+MRCKF = function(W, Ymat, q, penalty = "lasso"){
   ### Load Packages ###
   #print("Loading Packages")
   #packageInitialization()
