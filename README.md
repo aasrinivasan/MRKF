@@ -5,7 +5,7 @@ This repository contains the R implementation of the Mulitple Response Compositi
 
 For more details on the MRCKF paper, please refer to the original manuscript hosted at: [ LINK ]
 
-For details on running MRCKF, please view the MRKFVignette.R file.
+For details on running MRCKF, please view the MRCKFVignette.R file.
 
 ## Package Installation
 
