@@ -1,0 +1,139 @@
+---
+title: "MRCKF Vingette"
+author: "Arun Srinivasan (uus91@psu.edu)"
+date: "8/16/2021"
+output: html_document
+---
+
+### Introduction
+
+We demonstrate the use of MRCKF through the following vignette. To illustrate this method, we conduct the following simulation of data under the linear model assumed in the MRCKF manuscript namely,
+
+$$Y=XB + E$$
+where $Y$ denotes the $n \times K$ response matrix, $X$ is the $n\times p$ covariate matrix, $B$ is the $p\times K$ coefficient and $E$ is the $n\times K$ response error matrix where $K$ denotes the number of responses of interest. 
+
+Firstly, we must load the MRCKF function into R.
+
+```{r, warning=F, message=F}
+library(MRCKF)
+```
+
+### Controlled Variable Selection across Multiple Responses for Compositional Data
+
+
+To ensure replicability, we fix a random seed for generating this simulated data.
+```{r}
+set.seed(123)
+```
+
+In this section, we specify the underlying parameter settings and generate data under linear model.
+
+```{r, warning=F, message=F}
+# Initialize Parameters
+n = 100        # number of samples
+p = 200        # number of features (without reference)
+pstar = p + 1  #number of features (including reference)
+K = 2          # number of responses
+A = 3          # signal amplitude
+sp = .05       # sparsity percentage
+errorRho = .7  # error rho for E
+
+# Generate covariance of W
+sigma = matrix(0, nrow = pstar, ncol = pstar)
+for(i in 1:pstar){
+  for(j in 1:pstar){
+    sigma[i,j] = .5^(abs(i-j))
+  }
+}
+
+# generate W (latent log-normal data)
+means = rep(1, pstar)
+W = mvlognormal(n, means, Sigma = diag(sigma), R = sigma)
+colnames(W) = paste("Taxa", 1:ncol(W))
+
+# generate B (coefficient matrix)
+means = rep(1, pstar)
+Aset = seq(-A,A)
+if(length(which(Aset==0))!=0){
+  Aset = Aset[-which(Aset==0)]
+}
+B = matrix(0, nrow = p, ncol = K)
+totalSig = p*K
+nSig = floor(totalSig*sp)
+signalEntries = sort(sample(1:totalSig, size = nSig, replace = F))
+Bset = sample(Aset, nSig, replace = T)
+B[signalEntries] = Bset
+
+
+# generate error matrix E
+errorCovariance = matrix(0,K, K)
+for(i in 1:K){
+  for(j in 1:K){
+    errorCovariance[i,j] = errorRho^abs(i-j)
+  }
+}
+
+E = matrix(0, nrow = n, ncol = K)
+for(i in 1:n){
+  ei = rnorm(K, mean = rep(0, K), errorCovariance)
+  E[i,] = ei
+}
+
+# generate Z (compositional matrix)
+Z = acomp(W)
+Z = as.matrix(Z)
+
+# generate X (alr-transformation matrix)
+ref = Z[,pstar]
+X = matrix(0, nrow = n, ncol = p)
+for(t in 1:ncol(X)){
+  X[,t] = log(Z[,t]/ref)
+}
+
+# generate Y (response matrix)
+Y = X%*%B + E
+colnames(Y) = paste("Response", 1:ncol(Y))
+```
+
+
+### Example Implementation
+
+To inovke the MRCKF method, we call the MRCKF function with the default settings. We will target a $q=.2$ threshold.
+
+```{r, warning=F, message=F, results = 'hide'}
+q = .2         # targeted FDP threshold
+result = MRCKF(W, Y, q)
+```
+
+As the coefficient matrix $B$ is large, we print out the first 10 rows of the selection matrices under both the MRCKF and MRCKF+ thresholds.
+
+```{r}
+# display the first 10 rows of the selection matrix under the MRCKF threshold
+print(result$S[1:10,])
+
+# display the first 10 rows of the selection matrix under the MRCKF+ threshold
+print(result$Sp[1:10,])
+```
+
+
+Through this, we are able to compute the empircal FDP and Power by comparing the selected elements of the selection matrix to the indicies of the non-zero entries of $B$.
+
+```{r}
+selectionSetS = which(result$S != 0)
+selectionSetSp = which(result$Sp != 0)
+
+truth = which(B != 0)
+
+# compute selection statistics
+fdrS = computeFDR(selectionSetS, truth)
+powerS = computePower(selectionSetS, truth)
+fdrSp = computeFDR(selectionSetSp, truth)
+powerSp = computePower(selectionSetSp, truth)
+```
+
+```{r, echo=F}
+paste("The estimated FDP under the MRCKF threshold is", fdrS)
+paste("The estimated Power under the MRCKF threshold is", powerS)
+paste("The estimated FDP under the MRCKF+ threshold is", fdrSp)
+paste("The estimated Power under the MRCKF+ threshold is", powerSp)
+```
