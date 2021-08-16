@@ -14,3 +14,7 @@ To install the MRCKF R package from github, run:
 library(devtools)
 install_github(repo-"aasrinivasan/MRCKF")
 ```
+
+## Example Vignette
+
+Please see https://aasrinivasan.github.io/MRCKF/ for an example on implementing the MRCKF method.
