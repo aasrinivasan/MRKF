@@ -9,7 +9,7 @@ For more details on the MRCKF paper, please refer to the manuscript hosted at: [
 To install the MRCKF R package from github, run:
 ```{r}
 library(devtools)
-install_github(repo-"aasrinivasan/MRCKF")
+install_github(repo="aasrinivasan/MRCKF")
 ```
 
 ## Example Vignette
