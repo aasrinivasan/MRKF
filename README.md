@@ -1,7 +1,7 @@
 # Multiple Response Compositional Knockoff Filter
 ### Arun Srinivasan, Xiang Zhan, and Lingzhou Xue
 
-This repository contains the R implementation of the Mulitple Response Compositional Knockoff Filter (MRCKF). 
+This repository contains the R implementation of the Multiple Response Compositional Knockoff Filter (MRCKF). 
 
 ## Package Installation
 
