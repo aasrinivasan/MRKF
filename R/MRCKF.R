@@ -48,6 +48,7 @@ MRCKF = function(W, Ymat, q, penalty = "lasso"){
   K = ncol(Ymat)
   n = nrow(W)
   pstar = ncol(W)
+  ref = W[,pstar]
   Y = as.vector(Ymat)
   p = pstar - 1
 
